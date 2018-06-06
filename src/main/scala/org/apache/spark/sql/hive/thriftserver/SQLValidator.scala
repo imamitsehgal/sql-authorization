@@ -8,5 +8,6 @@ object SQLValidator {
     }else{
       throw new RuntimeException(s"User $user is not allowed to run this query. You are only allowed to run a select query")
     }
+
   }
 }
