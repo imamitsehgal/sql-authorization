@@ -227,7 +227,9 @@ private[hive] class SparkExecuteStatementOperation(
       sqlContext.sparkContext.setLocalProperty("spark.scheduler.pool", pool)
     }
     try {
+      // TODO Either install Ranger or move this to extensions
       MaliciousStatementBlocker.validate(parentSession.getUsername,statement)
+
       result = sqlContext.sql(statement)
       logDebug(result.queryExecution.toString())
       result.queryExecution.logical match {

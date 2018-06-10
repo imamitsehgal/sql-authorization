@@ -3,9 +3,25 @@ package org.apache.spark.sql.hive.thriftserver
 import org.apache.commons.logging.LogFactory
 import org.apache.hive.service.cli.HiveSQLException
 
+import scala.io.Source
+
 object MaliciousStatementBlocker {
 
   val log = LogFactory.getLog("MaliciousStatementBlocker")
+
+  private var validCommands: Map[String, Boolean] = _
+
+  def loadValidCommands = {
+
+    validCommands = {
+      val pathofValidCmdFile = Option(System.getProperty("valid.statement.config.path"))
+      if (pathofValidCmdFile.isDefined)
+        Source.fromFile(pathofValidCmdFile.get).getLines().map(cmd => (cmd -> true)).toMap
+      else
+        Source.fromFile(getClass.getClassLoader.getResource("validcommands.txt").getPath).getLines().map(cmd => (cmd -> true)).toMap
+    }
+  }
+  loadValidCommands
 
   def error(sql:String, user:String)={
     log.error(s"Malicious SQL: ${sql}")
@@ -13,12 +29,13 @@ object MaliciousStatementBlocker {
   }
 
   def validate(user:String,sql:String):String={
-     sql.toLowerCase.trim.split(" ")(0) match {
-       case "select" | "describe" | "show" | "use" => sql;
-       case "set" => if(sql.trim.equalsIgnoreCase("set -v")) sql else error(sql,user)
-       case x =>
-         error(sql,user)
-     }
+    val sqlToMatch = sql.trim.toLowerCase
+    if(validCommands.contains(sqlToMatch))
+      sql
+    else if(validCommands.contains(sqlToMatch.split(" ")(0)))
+      sql
+    else
+      error(sql,user)
   }
 
 }

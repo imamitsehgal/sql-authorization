@@ -2,6 +2,7 @@ package org.apache.spark.sql.hive.thriftserver
 
 import org.scalatest.{Matchers, WordSpec}
 
+
 class TestMaliciousStatementBlocker extends WordSpec with Matchers{
 
 val user = "amit"
@@ -44,6 +45,21 @@ val user = "amit"
       val x = MaliciousStatementBlocker.validate(user, query)
       assert(x === query)
     }
+    " case listing the config properties works fine " in {
+      val query = "SET -v"
+      val x = MaliciousStatementBlocker.validate(user, query)
+      assert(x === query)
+    }
+    " case system property set " in {
+      System.setProperty("valid.statement.config.path",getClass.getClassLoader.getResource("testvalidcmd.txt").getPath)
+      val query = "refresh"
+      MaliciousStatementBlocker.loadValidCommands
+      val x = MaliciousStatementBlocker.validate(user, query)
+      assert(x === query)
+    }
+
+
+
 
     }
 }

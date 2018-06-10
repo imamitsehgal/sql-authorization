@@ -1,0 +1,5 @@
+select
+use
+describe
+show
+set -v
