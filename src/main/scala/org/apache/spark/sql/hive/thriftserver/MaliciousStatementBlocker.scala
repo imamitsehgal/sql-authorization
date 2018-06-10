@@ -18,7 +18,7 @@ object MaliciousStatementBlocker {
       if (pathofValidCmdFile.isDefined)
         Source.fromFile(pathofValidCmdFile.get).getLines().map(cmd => (cmd -> true)).toMap
       else
-        Source.fromFile(getClass.getClassLoader.getResource("validcommands.txt").getPath).getLines().map(cmd => (cmd -> true)).toMap
+        throw new IllegalStateException("Unable to start the ThriftServer set valid.statement.config.path=<path to list of valid commands> ")
     }
   }
   loadValidCommands

@@ -6,7 +6,7 @@ import org.scalatest.{Matchers, WordSpec}
 class TestMaliciousStatementBlocker extends WordSpec with Matchers{
 
 val user = "amit"
-
+  System.setProperty("valid.statement.config.path",getClass.getClassLoader.getResource("testvalidcmd.txt").getPath)
   "SQL Validator" should{
     "throw exception for delete statement " in {
       val thrown = intercept[Exception] {
@@ -47,13 +47,6 @@ val user = "amit"
     }
     " case listing the config properties works fine " in {
       val query = "SET -v"
-      val x = MaliciousStatementBlocker.validate(user, query)
-      assert(x === query)
-    }
-    " case system property set " in {
-      System.setProperty("valid.statement.config.path",getClass.getClassLoader.getResource("testvalidcmd.txt").getPath)
-      val query = "refresh"
-      MaliciousStatementBlocker.loadValidCommands
       val x = MaliciousStatementBlocker.validate(user, query)
       assert(x === query)
     }
